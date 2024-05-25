@@ -4,14 +4,13 @@ services:
 ###Iniciar página: http://localhost:8880/otrs/index.pl 
 ###Usuário: root@localhost
 ###Senha: cXldfmKMtLAT4FGD
-  znuny:
-    image: alderpinto/znuny-lts:6.5.6
+  otrs:
+    image: alderpinto/otrs-ce:6.0.18
     restart: always
-    container_name: znuny
     ports:
 #      - 443:443
-      - 8880:8880
-      - 8881:8881
+      - 9980:8880
+      - 9981:8881
     env_file: .env      
     volumes:
 #      - ./letsencrypt:/etc/letsencrypt
@@ -19,19 +18,34 @@ services:
       - ./init:/app
       - ./app:/opt/otrs
     depends_on:
-      - postgres
-  postgres:
-###Usuário: otrs
-###Senha: G9MB0dCQ72wlnHpu  
-    image: postgres:15
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: mjeffomybyov7xffcba6
-      PGDATA: "/var/lib/postgresql/data/pgdata"
+      - mysql
+  mysql:
+    image: mysql:5.7
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - ./mysql:/var/lib/mysql
+    restart: always
+    ports:
+      - "23306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mjeffomybyov7xffcba6
+    command:
+      - --max-allowed-packet=64M
+      - --innodb-buffer-pool-size=256M
+      - --innodb-log-file-size=128M
+      - --character-set-server=utf8
+      - --bind-address=0.0.0.0      
+###  postgres:
+######Usuário: otrs
+######Senha: G9MB0dCQ72wlnHpu  
+###    image: postgres:15
+###    container_name: postgres
+###    restart: always
+###    environment:
+###      POSTGRES_USER: root
+###      POSTGRES_PASSWORD: mjeffomybyov7xffcba6
+###      PGDATA: "/var/lib/postgresql/data/pgdata"
+###    volumes:
+###      - postgres:/var/lib/postgresql/data
 
-volumes:
-  postgres:
+#volumes:
+#  postgres:

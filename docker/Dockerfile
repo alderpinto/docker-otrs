@@ -1,11 +1,11 @@
 FROM nginx:1.23.4-alpine3.17-perl
 LABEL maintainer="Alder Pinto <alder.pinto@gmail.com>"
-ENV ZNUNY_VERSION=6.5.6
-ENV ZNUNY_VERSION_ITSM=6.5.2
-ENV ZNUNY_VERSION_PRIMARYSECONDARY=6.5.2
-ENV ZNUNY_VERSION_SURVEY=6.5.1
-ENV ZNUNY_VERSION_FAQ=6.5.2
-ENV ZNUNY_VERSION_CLONEDB=6.5.2
+ENV ZNUNY_VERSION=6.0.18
+ENV ZNUNY_VERSION_ITSM=6.0.18
+#ENV ZNUNY_VERSION_PRIMARYSECONDARY=6.5.2
+ENV ZNUNY_VERSION_SURVEY=6.0.12
+ENV ZNUNY_VERSION_FAQ=6.0.18
+#ENV ZNUNY_VERSION_CLONEDB=6.5.2
 
 ENV ZNUNY_ROOT "/opt/otrs"
 
@@ -19,7 +19,7 @@ RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/re
 
 # Install apline packages for perl
 RUN apk add bash tar make gcc build-base gnupg perl perl-dev perl-app-cpanminus 
-RUN apk add --no-cache perl-plack perl-cgi-emulate-psgi perl-starman@testing supervisor postgresql15-client certbot certbot-nginx \
+RUN apk add --no-cache perl-plack perl-cgi-emulate-psgi perl-starman@testing supervisor mysql-client postgresql15-client certbot certbot-nginx \
 perl-datetime perl-dbi perl-archive-zip perl-authen-sasl perl-namespace-clean \
 perl-moo perl-math-random-mt-auto perl-crypt-random perl-yaml-libyaml \
 perl-xml-parser perl-xml-libxml perl-xml-libxslt perl-text-csv_xs perl-template-toolkit \
@@ -29,16 +29,16 @@ perl-css-minifier-xs perl-dbd-pg perl-dbd-mysql perl-dbd-odbc perl-javascript-mi
 perl-encode-hanextra perl-data-optlist perl-io-gzip perl-pathtools perl-scalar-list-utils && \
 cpanm CGI::Compile Plack::Middleware::Expires Plack::Middleware::Session::Cookie
 
-RUN wget https://download.znuny.org/releases/znuny-${ZNUNY_VERSION}.tar.gz && \
+RUN wget https://download.znuny.org/releases/otrs-${ZNUNY_VERSION}.tar.gz && \
 #mkdir ${ZNUNY_ROOT} && \
-tar xfz znuny-${ZNUNY_VERSION}.tar.gz -C /opt && \
-mv /opt/znuny-${ZNUNY_VERSION} ${ZNUNY_ROOT} && \
+tar xfz otrs-${ZNUNY_VERSION}.tar.gz -C /opt && \
+mv /opt/otrs-${ZNUNY_VERSION} ${ZNUNY_ROOT} && \
 mkdir ${ZNUNY_ROOT}/addons && \
-wget https://download.znuny.org/releases/itsm/bundle6x/ITSM-${ZNUNY_VERSION_ITSM}.opm -P ${ZNUNY_ROOT}/addons/ && \
-wget https://download.znuny.org/releases/packages/Znuny-PrimarySecondary-${ZNUNY_VERSION_PRIMARYSECONDARY}.opm -P ${ZNUNY_ROOT}/addons/ && \
+wget https://download.znuny.org/releases/itsm/bundle6/ITSM-${ZNUNY_VERSION_ITSM}.opm -P ${ZNUNY_ROOT}/addons/ && \
+#wget https://download.znuny.org/releases/packages/Znuny-PrimarySecondary-${ZNUNY_VERSION_PRIMARYSECONDARY}.opm -P ${ZNUNY_ROOT}/addons/ && \
 wget https://download.znuny.org/releases/packages/Survey-${ZNUNY_VERSION_SURVEY}.opm -P ${ZNUNY_ROOT}/addons/ && \
-wget https://download.znuny.org/releases/packages/FAQ-${ZNUNY_VERSION_FAQ}.opm -P ${ZNUNY_ROOT}/addons/ && \
-wget https://download.znuny.org/releases/packages/CloneDB-${ZNUNY_VERSION_CLONEDB}.opm -P ${ZNUNY_ROOT}/addons/ 
+wget https://download.znuny.org/releases/packages/FAQ-${ZNUNY_VERSION_FAQ}.opm -P ${ZNUNY_ROOT}/addons/
+#wget https://download.znuny.org/releases/packages/CloneDB-${ZNUNY_VERSION_CLONEDB}.opm -P ${ZNUNY_ROOT}/addons/ 
 
 RUN adduser -h ${ZNUNY_ROOT} -G nginx -s /bin/sh -H -D otrs && \
 ${ZNUNY_ROOT}/bin/otrs.SetPermissions.pl --otrs-user=otrs --web-group=nginx && \
@@ -60,7 +60,7 @@ RUN rm /var/cache/apk/* && \
 rm -rf /root/.cpanm
 
 RUN mv ${ZNUNY_ROOT} / && \
-rm -rf /opt/znuny-${ZNUNY_VERSION}.tar.gz && \
+rm -rf /opt/otrs-${ZNUNY_VERSION}.tar.gz && \
 chmod 755 /*.sh
 
 EXPOSE 8880 8881
